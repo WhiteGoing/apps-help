@@ -240,4 +240,188 @@ ORDER BY 2,3 DESC;                   # 第二行升序，第三行降序
    >
    >    (NOT) UNIQUE   (集合)
 
-3. ​
+3. SQL的数据更新
+
+   1. 数据插入　INSERT：
+
+      > 1. 插入单个元组
+      >
+      >    INSERT INTO 基本表名(列名表)
+      >
+      >    ​	　VALUES  (元组表)
+      >
+      >    VALUES后的元组值中列的顺序必须与基本表一一对应。如果基本表名后有列表名，则应该包括关系的所有非空的属性，如果基本表名后没有列表名，这表示插入元组的每个分量的值。
+      >
+      >    Insert ignore into    ; 忽略已经存在的数据
+      >
+      >    insert replace into   ;替换以及存在的数据
+      >
+      > 2. 插入子查询的结果
+      >
+      >    INSERT  INTO  基本表名(列名表)
+      >
+      >    ​	　SELECT 查询语句
+      >
+      >    ***由于SELECT子句后可跟表达式，而常量是表达式，因此可以用带SELECT语句的插入语句为新插入的元组的某些分量赋值。***
+      >
+      >    如：
+      >
+      >    INSERT INTO SPJ
+      >
+      >    SELECT SNO, PNO, 'J7', PRICE, 60
+      >
+      >    FROM SPJ
+      >
+      >    WHERE JNO='J1';
+      >
+      > 3. 数据删除
+      >
+      >    DELETE FROM <表名>
+      >
+      >    WHERE <条件表达式>
+      >
+      > 4. 数据修改
+      >
+      >    UPDATE 基本表名
+      >
+      >    SET 列名＝值表达式[, 列名＝值表达式...]
+      >
+      >    [WHERE 条件表达式]
+      >
+      >    修改指定表中满足条件表达式的元组中的指定属性值，SET指用‘值表达式’代替之前的值，WHERE没有的话表示修改所有的值
+      >
+      >    如：
+      >
+      >    UPDATE SPJ
+      >
+      >    SET PRICE=PRICE * (1+0.6)
+      >
+      >    WHERE PNO='P4'
+      >
+      >    AND SNO='S5'
+      >
+      > 5. 用 **ALTER TABLE ... ADD ... **语句可以向已存在的表插入新字段（column），并且能够与创建表时一样，在字段名和数据类型后加入NOT NULL、DEFAULT等限定，[可参考](http://www.runoob.com/sqlite/sqlite-alter-command.html)
+      >
+      >    ​
+      >
+      > 6. 对视图的更新操作
+      >
+      >    对视图元组的更新操作(INSERT, DELETE, UPDATE)有如下三条规则：
+      >
+      >    > 1. 如果一个视图是从**多个基本表**使用**联接操作**导出的，那么**不允许**对这个视图执行更新操作
+      >    > 2. 如果在到处视图的过程中使用了**分组**和**聚合操作**，也**不允许**对这个视图执行更新操作
+      >    > 3. 如果视图是从单个基本表使用**选择**、**投影**操作导出的，并且包含了基本表的**主键或某个候选键**，这样的视图称为“行列子集视图”，**可以**被执行更新操作。
+      >
+      >    在SQL2中，允许更新的视图在定义时，必须加上"WITH CHECK OPTION"
+
+   2. ​
+
+   ​
+
+### 5. 补充
+
+1. sql语句根据条件查询指定数量的数据
+
+   SELECT * form 表名 WHERE 条件 limit 5,10; //检索6-15条数据
+
+   SELECT * form 表名 WHERE 条件 limit 5,-1; //检索6到最后一条数据
+
+   SELECT * form 表名 WHERE 条件 limit 5; //检索前5条数据 
+
+2. 使用CREATE 语句创建索引
+
+   CREATE INDEX index_name ON table_name(column_name,column_name) include(score)
+
+   普通索引
+
+   CREATE  INDEX index_name ON table_name (column_name) ;
+
+   唯一索引
+
+   CREATE UNIQUE INDEX index_name ON table_name (column_name) ;
+
+   非空索引
+
+   CREATE PRIMARY KEY INDEX index_name ON table_name (column_name) ;
+
+   主键索引 
+
+   使用ALTER TABLE　语句创建索引
+
+   alter table table_name add index index_name (column_list) ;
+
+   alter table table_name add unique (column_list) ;
+
+   alter table table_name add primary key (column_list) ;
+
+   删除索引
+
+   drop index index_name on table_name ;
+
+   alter table table_name drop index index_name ;
+
+   alter table table_name drop primary key ;
+
+   强制索引
+
+   题目：针对salaries表emp_no字段创建索引idx_emp_no，查询emp_no为10005, 使用强制索引。
+
+   SQLite中，使用 INDEXED BY 语句进行强制索引查询，[可参考](http://www.runoob.com/sqlite/sqlite-indexed-by.html)
+
+   `SELECT * FROM salaries INDEXED BY idx_emp_no WHERE emp_no = '10005'`
+
+     MySQL中，使用 FORCE INDEX 语句进行强制索引查询，[可参考](http://www.jb51.net/article/49807.htm)  
+
+   `SELECT * FROM salaries FORCE INDEX idx_emp_no WHERE emp_no = '10005'`
+
+3. 视图
+
+   ```sql
+   # 创建
+   CREATE VIEW view_name AS
+   SELECT column_name(s)
+   FROM table_name
+   WHERE condition
+
+   ＃更新　SQL CREATE OR REPLACE VIEW Syntax
+   CREATE OR REPLACE VIEW view_name AS
+   SELECT column_name(s)
+   FROM table_name
+   WHERE condition
+
+   ＃撤销　SQL DROP VIEW Syntax
+   DROP VIEW view_name
+   ```
+
+4. 触发器
+
+   创建一个Update触发器： 
+
+   ```sql
+    Create Trigger truStudent 
+
+          On Student                         --在Student表中创建触发器 
+
+          for Update                          --为什么事件触发 delete...
+
+        As                                        --事件触发后所要做的事情 
+
+          if Update(StudentID)            
+
+          begin 
+
+            Update BorrowRecord 
+
+              Set StudentID=i.StudentID 
+
+              From BorrowRecord br , Deleted   d ,Inserted i      --Deleted和Inserted临时表 
+
+              Where br.StudentID=d.StudentID 
+
+          end 
+
+   ```
+
+   ​     理解触发器里面的两个临时的表：Deleted , Inserted 。注意Deleted 与Inserted分别表示触发事件的表“旧的一条记录”和“新的一条记录”。 
+
+5. ​
